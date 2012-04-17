@@ -1,4 +1,7 @@
 (function($) {
+    if (window.location.pathname == '/item') {
+        return;
+    }
     var $scores = $('span[id^=score]');
     var max_score = 0;
     $scores.each(function() {
