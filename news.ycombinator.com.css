@@ -9,3 +9,13 @@ a[id^=up_]:before {
     top: -2px;
     color: rgba(0, 0, 0, .5);
 }
+td.subtext, span.comhead, td.title {
+    color: rgba(0, 0, 0, .5);
+}
+td.subtext a:link, td.title a:link,
+td.subtext a:visited, td.title a:visited {
+    color: rgba(0, 0, 0, .8);
+}
+td.subtext a:visited, td.title a:visited {
+    color: #ccc;
+}
