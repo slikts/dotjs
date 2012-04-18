@@ -7,18 +7,24 @@
         var $scores = $('span[id^=score]');
         var max_score = 0;
         var all_scores = [];
+        var score_sum = 0;
         $scores.each(function() {
             var $this = $(this);
             var score = parseInt($this.text(), 10);
             $this.data('score', score);
             max_score = Math.max(max_score, score);
             all_scores.push(score);
+            score_sum += score;
         });
         if (!all_scores.length) {
             // No scores found
             return;
         }
         var median_score = all_scores[Math.round(all_scores.length / 2)];
+        var average_score = Math.round(score_sum / all_scores.length);
+//        console.log('median', median_score)
+//        console.log('average', average_score)
+//        console.log('length', all_scores.length)
         $scores.each(function() {
             var $this = $(this);
             var score = $this.data('score');
@@ -32,21 +38,37 @@
     };
     highlight_scores();
 
-    function setup_link() {
-        var $link = $('a[href^="/x"]');
-        $link.click(function() {
-            $.ajax({
-                url: $link.attr('href'),
-                dataType: 'html',
-                success: function(data) {
-                    var $rows = $('<div>').html(data).find('a[id^=up_]:first').closest('tbody').children('tr');
-                    $link.closest('tr').prev().remove().end().replaceWith($rows);
-                    highlight_scores();
-                    setup_link();
+    function load_next(callback) {
+        var $this = $(this);
+        $.ajax({
+            url: $this.attr('href'),
+            dataType: 'html',
+            success: function(data) {
+                var $rows = $('<div>').html(data).find('a[id^=up_]:first').closest('tbody').children('tr');
+                $this.closest('tr').prev().remove().end().replaceWith($rows);
+                highlight_scores();
+                setup_link();
+                if (callback) {
+                    callback();
                 }
-            });
-            return false;
+            }
         });
+        // Disable link
+        $this.removeAttr('href');
+        return false;
+    }
+
+    var $link = null;
+    function setup_link() {
+        $link = $('a[href^="/x"]').click(load_next);
     }
     setup_link();
+
+    var autoload = 3;
+    function autoload_next() {
+        if (autoload--) {
+            load_next.bind($link)(autoload_next);
+        }
+    }
+    autoload_next();
 })(jQuery);
