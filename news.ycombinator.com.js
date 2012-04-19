@@ -1,41 +1,46 @@
 (function($) {
     function highlight_scores() {
-        if (window.location.pathname == '/item') {
+        if (window.location.pathname === '/item') {
             // Do nothing in comment pages
             return;
         }
         var $scores = $('span[id^=score]');
-        var max_score = 0;
         var all_scores = [];
-        var score_sum = 0;
         $scores.each(function() {
             var $this = $(this);
-            var score = parseInt($this.text(), 10);
-            $this.data('score', score);
-            max_score = Math.max(max_score, score);
+            var score = $this.data('score');
+            if (score === undefined) {
+                score = parseInt($this.text(), 10);
+                $this.data('score', score);
+                $this.css({
+                    'color': '#000',
+                    'font-size': '15px'
+                });
+            }
             all_scores.push(score);
-            score_sum += score;
         });
         if (!all_scores.length) {
             // No scores found
             return;
         }
+        // Sort scores numerically
+        all_scores.sort(function(a, b) { return a - b; });
         var median_score = all_scores[Math.round(all_scores.length / 2)];
-        var average_score = Math.round(score_sum / all_scores.length);
-//        console.log('median', median_score)
-//        console.log('average', average_score)
-//        console.log('length', all_scores.length)
+        var max_score = all_scores[all_scores.length - 1];
+        var max_score_opacity = max_score / median_score;
+
         $scores.each(function() {
             var $this = $(this);
             var score = $this.data('score');
-            var opacity = (score / max_score + score / median_score) / 2;
-            var color = 'rgba(255, 0, 0, ' + opacity + ')';
+            var opacity = score / median_score / max_score_opacity;
+            $this.text(score);
+            var color = 'rgba(' + [255, 0, 0, opacity].join(',') + ')';
             var $row = $this.closest('tr');
             $row.add($row.prev()).css({
                 'background-color': color
             });
         });
-    };
+    }
     highlight_scores();
 
     function load_next(callback) {
@@ -70,5 +75,7 @@
             load_next.bind($link)(autoload_next);
         }
     }
-    autoload_next();
+    if (autoload) {
+        autoload_next();
+    }
 })(jQuery);
