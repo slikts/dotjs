@@ -1,4 +1,11 @@
 (function($) {
+    function numerical_sort(a, b) {
+        return a - b;
+    }
+    function get_median(list) {
+        return list[Math.round((list.length - 1) / 2)];
+    }
+    
     function highlight_scores() {
         if (window.location.pathname === '/item') {
             // Do nothing in comment pages
@@ -6,35 +13,51 @@
         }
         var $scores = $('span[id^=score]');
         var all_scores = [];
+        var all_comments = [];
         $scores.each(function() {
-            var $this = $(this);
-            var score = $this.data('score');
+            var $score = $(this);
+            var score = $score.data('score');
             if (score === undefined) {
-                score = parseInt($this.text(), 10);
-                $this.data('score', score);
-                $this.css({
+                score = parseInt($score.text(), 10);
+                $score.data('score', score);
+                $score.css({
                     'color': '#000',
                     'font-size': '15px'
                 });
             }
             all_scores.push(score);
+            
+            var comments = $score.data('comments');
+            if (comments === undefined) {
+                var $comments = $score.closest('tr').find('a[href^=item]');
+                comments = parseInt($comments.text(), 10);
+                $score.data('comments', comments);
+            }
+            all_comments.push(comments);
         });
         if (!all_scores.length) {
             // No scores found
             return;
         }
-        // Sort scores numerically
-        all_scores.sort(function(a, b) { return a - b; });
-        var median_score = all_scores[Math.round(all_scores.length / 2)];
+        
+        all_scores.sort(numerical_sort);
+        var median_score = get_median(all_scores);
         var max_score = all_scores[all_scores.length - 1];
         var max_score_opacity = max_score / median_score;
+        
+        all_comments.sort(numerical_sort);
+        var median_comments = get_median(all_comments);
+        var max_comments = all_comments[all_comments.length - 1];
+        var max_comments_opacity = max_comments / median_comments;
 
         $scores.each(function() {
             var $this = $(this);
             var score = $this.data('score');
             var opacity = score / median_score / max_score_opacity;
             $this.text(score);
-            var color = 'rgba(' + [255, 0, 0, opacity].join(',') + ')';
+            var comments = $this.data('comments');
+            var blue = Math.round(comments / median_comments / max_comments_opacity * 255);
+            var color = 'rgba(' + [255, 0, blue, opacity].join(',') + ')';
             var $row = $this.closest('tr');
             $row.add($row.prev()).css({
                 'background-color': color
