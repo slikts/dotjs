@@ -20,10 +20,6 @@
             if (score === undefined) {
                 score = parseInt($score.text(), 10);
                 $score.data('score', score);
-                $score.css({
-                    'color': '#000',
-                    'font-size': '15px'
-                });
             }
             all_scores.push(score);
             

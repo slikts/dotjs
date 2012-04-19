@@ -19,3 +19,7 @@ td.subtext a:visited, td.title a:visited {
 td.subtext a:visited, td.title a:visited {
     color: #ccc;
 }
+span[id^=score] {
+    font-size: 13px;
+    color: #000;
+}
